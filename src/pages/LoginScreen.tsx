@@ -12,6 +12,7 @@ import { Navigation } from '../types';
 import { StackActions, NavigationActions } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import axios from 'axios';
+import deviceStorage from '../services/deviceStorage';
 
 type Props = {
   navigation: Navigation;
@@ -24,7 +25,7 @@ const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
 
-  const _onLoginPressed = () => {
+  const _onLoginUserPressed = () => {
     /*const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
 
@@ -33,43 +34,9 @@ const LoginScreen = ({ navigation }: Props) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
-
-    let r = axios.get("https://api-test.waynimovil.com/authenticate?email=" + email.value + "&password=" + password.value).then(
-      function (res) {
-        if (res.data.status != "error") {
-        
-          let token = res.data.token;
-
-          axios({
-            method: 'get',
-            url: 'https://api-test.waynimovil.com/account',
-            headers: {
-              'Authorization': 'Bearer ' + token
-            }
-          }).then(function (response) {
-
-            let userMD = response.data[0];
-
-            navigation.navigate('Dashboard', {
-              user: userMD,
-              token: token
-            });
-
-          }).catch(function (error) {
-              console.log(error);
-          });
-
-        } else {
-          console.log(res.data.messages);
-        }
-      }).catch(function (err) {
-        console.log("Algo paso en la llamada");
-      });
-    
+  
     if (!email.value)
         email.value = emailDefault;
-    */
-    /*
     
     let r = axios.get("https://api-test.waynimovil.com/authenticate?email=" + email.value + "&password=" + password.value).then(
       function (res) {
@@ -80,19 +47,24 @@ const LoginScreen = ({ navigation }: Props) => {
         }
       }).catch(function (err) {
         console.log("Algo paso en la llamada");
-      });*/
+      });
+    */
 
-    let User = {
-      name: "Martín",
-      last_name: "Rivas",
-      email: email.value
-    }
-
-    navigation.navigate('NavAuth', {
-      user: User,
-      token: '123'
+    let r = axios.post('http://localhost:8082/users/login', {
+      "email": email.value,
+      "password": password.value
+    }).then(
+    function (res) {
+        if (res.data.token && res.data.user) {
+          deviceStorage.saveKey("JWT_TOKEN", res.data.token);
+          deviceStorage.saveKey("USER", JSON.stringify(res.data.user));
+          navigation.navigate('NavAuth', res.data.user);
+        } else {
+          console.log(res.data.messages);
+        }
+    }).catch(function (err) {
+      console.log("Algo paso en la llamada");
     });
-    
   };
 
   return (
@@ -134,7 +106,7 @@ const LoginScreen = ({ navigation }: Props) => {
         </TouchableOpacity>
       </View>
 
-      <Button mode="contained" onPress={_onLoginPressed}>
+      <Button mode="contained" onPress={_onLoginUserPressed}>
         Ingreso a ORT
       </Button>
 

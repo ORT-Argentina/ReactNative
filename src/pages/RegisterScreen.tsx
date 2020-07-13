@@ -14,6 +14,7 @@ import {
   nameValidator,
 } from '../core/validators';
 import axios from 'axios';
+import deviceStorage from '../services/deviceStorage';
 
 type Props = {
   navigation: Navigation;
@@ -38,27 +39,21 @@ const RegisterScreen = ({ navigation }: Props) => {
 
 
 
-    axios.post('https://api-test.waynimovil.com/account', {
+    axios.post('http://localhost:8082/users', {
       "email": email.value,
-      "first_name": name.value,
-      "legal_name": "2030333390",
-      "document_number": "30333390",
-      "password": password.value,
-      "country_id": 32
-    }).then(function (r) {
-        if (r.data.status == "success") {
-          
-          console.log("Se registro OK");
-          
-          navigation.navigate('Login', { email: email.value });
-
-        } else {
+      "name": name.value,
+      "password": password.value
+    }).then(function (res) {
+      if (res.data.user){
+        deviceStorage.saveKey("JWT_TOKEN", res.data.token);
+        deviceStorage.saveKey("USER", JSON.stringify(res.data.user));
+        navigation.navigate('Login');
+      } else {
           console.log("Falta algun campo");  
-        }
-      })
-      .catch(function (error) {
-        console.log("Hay un error en el servidor.");  
-      });
+      }
+    }).catch(function (error) {
+      console.log("Hay un error en el servidor.");
+    });
   };
 
   return (

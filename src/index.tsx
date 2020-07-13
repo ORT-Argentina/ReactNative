@@ -10,6 +10,7 @@ import {
     RegisterScreen,
     ForgotPasswordScreen
 } from './pages';
+import deviceStorage from './services/deviceStorage';
 
 const INITIAL_ROUTE_NAME = 'HomeScreen';
 

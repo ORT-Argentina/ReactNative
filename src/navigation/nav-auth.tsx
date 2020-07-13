@@ -1,15 +1,9 @@
-import React, { memo } from 'react';
-import { StyleSheet, Platform } from 'react-native';
-import Contacts from '../pages/Contacts';
-import Dashboard from '../pages/Dashboard';
+import React, { Component, memo } from 'react';
 import { Navigation } from '../types';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { createStackNavigator } from '@react-navigation/stack';
 import DashboardTabs from '../pages/DashboardTabs'
-import {
-  createBottomTabNavigator,
-  BottomTabNavigationProp,
-} from '@react-navigation/bottom-tabs';
+import Logout from '../pages/Logout'
+import deviceStorage from '../services/deviceStorage';
 
 type Props = {
   navigation: Navigation;
@@ -17,52 +11,49 @@ type Props = {
 
 const Stack = createStackNavigator();
 
-function componentWillUnmount(){
-  this.props.navigation.state.params.onClose()
-}
-
-const NavAuth = ({ navigation }: Props) => {
-
-  let user = navigation.getParam('user', {});
-  let token = navigation.getParam('token', {});
-
-  if (!user.name) {
-    navigation.navigate('LoginScreen');
-    //return;
-  }
-
-  var axios = require('axios');
-
-  var config = {
-    method: 'get',
-    url: 'https://api-test.waynimovil.com/alerts',
-    headers: {
-      'Authorization': 'Bearer ' + token
-    }
+//const NavAuth = ({ navigation }: Props) => {
+class NavAuth extends Component {
+  
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: navigation.getParam('otherParam', 'DEFAULT'),
+    };
   };
 
-  axios(config)
-    .then(function (response) {
-      console.log(response.data);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+      user: '',
+      loading: true
+    };
+  }
 
-  return (
-    <Stack.Navigator
-      initialRouteName="Home"
-      headerMode="screen"
-    >
-      <Stack.Screen
-        name="Home"
-        component={DashboardTabs}
-        options={{
-          headerTitleAlign:'center',
-          title: 'ORT en CASA',
-        }}
-      />
-    </Stack.Navigator>
-  );
+  render() {
+    return (
+      <Stack.Navigator
+        initialRouteName="Home"
+        headerMode="screen"
+      >
+        <Stack.Screen
+          name="Home"
+          component={DashboardTabs}
+          options={{
+            headerTitleAlign: 'center',
+            title: 'ORT en CASA',
+          }}
+        />
+        <Stack.Screen
+          name="Logout"
+          component={Logout}
+          options={{
+            headerShown: false,
+            headerTitleAlign: 'center',
+            title: 'LogOut',
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
 }
 export default memo(NavAuth);
